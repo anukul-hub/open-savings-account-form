@@ -1,107 +1,41 @@
 package hooks;
 
-
-import com.aventstack.extentreports.ExtentReports;
-import com.aventstack.extentreports.ExtentTest;
-import com.aventstack.extentreports.Status;
-import com.aventstack.extentreports.reporter.ExtentSparkReporter;
 import factory.DriverFactory;
-import io.cucumber.java.*;
-import org.apache.commons.io.FileUtils;
+import io.cucumber.java.After;
+import io.cucumber.java.Before;
+import io.cucumber.java.Scenario;
 import org.openqa.selenium.OutputType;
 import org.openqa.selenium.TakesScreenshot;
 import org.openqa.selenium.WebDriver;
-
-import java.io.File;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-
+import utils.ConfigReader;
 
 public class Hooks {
 
-    WebDriver driver;
-    private static ExtentReports extent;
-    private static final ThreadLocal<ExtentTest> test = new ThreadLocal<>();
-
-
-    @BeforeAll
-    public static void beforeAll() {
-        try {
-            Files.createDirectories(Paths.get("target/reports"));
-            ExtentSparkReporter spark = new ExtentSparkReporter("target/reports/ExtentReport.html");
-            extent = new ExtentReports();
-            extent.attachReporter(spark);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-    }
-
+    private WebDriver driver;
 
     @Before
-    public void setup(Scenario scenario) {
-//// Browser from system property or TestNG parameter
-//String browser = System.getProperty("browser", System.getProperty("selenium.browser", "chrome"));
-//DriverFactory.launchBrowser(browser);
+    public void setUp(Scenario scenario) {
+        System.out.println("***** Starting Scenario: " + scenario.getName() + " *****");
 
-        DriverFactory.launchBrowser("chrome");
-//	DriverFactory.getDriver();
+        // Load config before starting driver
+        ConfigReader.loadConfig();
 
-        test.set(extent.createTest(scenario.getName()));
-        test.get().assignCategory(scenario.getSourceTagNames().toArray(new String[0]));
-
+        driver = DriverFactory.getDriver();
+        driver.manage().deleteAllCookies();
     }
-
-
-    @AfterStep
-    public void afterStep(Scenario scenario) {
-// Attach a screenshot for each step (optional). You can limit to failures only.
-        if (scenario.isFailed()) {
-            attachScreenshot(Status.FAIL, scenario);
-        } else {
-// Uncomment for step-wise screenshots
-// attachScreenshot(Status.PASS, scenario);
-        }
-    }
-
 
     @After
     public void tearDown(Scenario scenario) {
         if (scenario.isFailed()) {
-            attachScreenshot(Status.PASS, scenario);
-            test.get().log(Status.FAIL, "Scenario failed");
-        } else {
-            test.get().log(Status.PASS, "Scenario passed");
+            // Take screenshot on failure
+            byte[] screenshot = ((TakesScreenshot) driver).getScreenshotAs(OutputType.BYTES);
+            scenario.attach(screenshot, "image/png", "Failed_Screenshot");
+            System.out.println("Screenshot captured for failed scenario: " + scenario.getName());
         }
-        DriverFactory.getDriver();
-        DriverFactory.quitBrowser();
-    }
 
+        // Quit driver after each scenario
+        DriverFactory.quitDriver();
 
-    @AfterAll
-    public static void afterAll() {
-        if (extent != null) {
-            extent.flush();
-        }
-    }
-
-
-    private void attachScreenshot(Status status, Scenario scenario) {
-        try {
-            WebDriver driver = DriverFactory.getDriver();
-            if (driver == null) return;
-            File src = ((TakesScreenshot) driver).getScreenshotAs(OutputType.FILE);
-            String time = new SimpleDateFormat("yyyyMMdd_HHmmss_SSS").format(new Date());
-            String name = scenario.getName().replaceAll("[^a-zA-Z0-9]", "_");
-            Path dest = Paths.get("target", "reports", "screenshots", name + "_" + time + ".png");
-            Files.createDirectories(dest.getParent());
-            FileUtils.copyFile(src, dest.toFile());
-            test.get().addScreenCaptureFromPath(dest.toString());
-        } catch (Exception e) {
-            test.get().warning("Failed to capture screenshot: " + e.getMessage());
-        }
+        System.out.println("***** Finished Scenario: " + scenario.getName() + " *****");
     }
 }
-

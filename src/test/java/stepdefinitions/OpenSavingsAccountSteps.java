@@ -4,6 +4,8 @@ import factory.DriverFactory;
 import io.cucumber.java.en.*;
 import org.openqa.selenium.WebDriver;
 import pageObjects.OpenSavingsAccountPage;
+import utils.ConfigReader;
+import utils.TestDataReader;
 
 public class OpenSavingsAccountSteps {
 
@@ -12,8 +14,25 @@ public class OpenSavingsAccountSteps {
 
     @Given("I am on the Open Savings Account page")
     public void i_am_on_the_open_savings_account_page() {
-        driver.get("file:///C:/Users/anuku/Desktop/wipro/Saving%20account%20form.html"); // update with actual URL
+        String url = ConfigReader.getProperty("url");
+        driver.get(url);
     }
+    @When("I fill the form with default test data")
+    public void i_fill_the_form_with_default_test_data() {
+        accountPage.enterText("fullname", TestDataReader.getProperty("fullname"));
+        accountPage.enterText("fathername", TestDataReader.getProperty("fathername"));
+        accountPage.enterText("occupation", TestDataReader.getProperty("occupation"));
+        accountPage.enterText("companyname", TestDataReader.getProperty("companyname"));
+        accountPage.enterText("dob", TestDataReader.getProperty("dob"));
+        accountPage.enterText("email", TestDataReader.getProperty("email"));
+        accountPage.enterText("phone", TestDataReader.getProperty("phone"));
+        accountPage.enterText("address", TestDataReader.getProperty("address"));
+        accountPage.enterText("idProof", TestDataReader.getProperty("idProof"));
+        accountPage.selectDropdown("accountType", TestDataReader.getProperty("accountType"));
+        accountPage.enterText("initialDeposit", TestDataReader.getProperty("initialDeposit"));
+    }
+
+
 
     @When("I enter {string} in the {string} field")
     public void i_enter_in_the_field(String value, String fieldId) {

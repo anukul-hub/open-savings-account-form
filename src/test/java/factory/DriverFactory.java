@@ -2,47 +2,35 @@ package factory;
 
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
-import org.openqa.selenium.chrome.ChromeOptions;
-import org.openqa.selenium.edge.EdgeDriver;
-import org.openqa.selenium.firefox.FirefoxDriver;
-
-import io.github.bonigarcia.wdm.WebDriverManager;
+import utils.ConfigReader;
 
 public class DriverFactory {
-
-    static WebDriver webDriver = null;
-
-    // ThreadLocal to handle parallel execution safely
-    private static ThreadLocal<WebDriver> driver = new ThreadLocal<>();
+    private static WebDriver driver;
 
     public static WebDriver getDriver() {
-        return driver.get();
-    }
+        if (driver == null) {
+            ConfigReader.loadConfig();
+            String browser = ConfigReader.getProperty("browser");
 
-    public static void launchBrowser(String browser) {
-
-
-        if (browser.equalsIgnoreCase("chrome")) {
-            WebDriverManager.chromedriver().setup();
-            ChromeOptions options = new ChromeOptions();
-            options.addArguments("--incognito");
-            options.addArguments("--start-maximized");
-            webDriver = new ChromeDriver(options);
-        } else if (browser.equalsIgnoreCase("firefox")) {
-            WebDriverManager.firefoxdriver().setup();
-            webDriver = new FirefoxDriver();
-        } else if (browser.equalsIgnoreCase("edge")) {
-            WebDriverManager.edgedriver().setup();
-            webDriver = new EdgeDriver();
+            switch (browser.toLowerCase()) {
+                case "chrome":
+                    driver = new ChromeDriver();
+                    break;
+                case "firefox":
+                    // Add firefox driver if needed
+                    break;
+                default:
+                    throw new RuntimeException("Unsupported browser: " + browser);
+            }
+            driver.manage().window().maximize();
         }
-
-        driver.set(webDriver);  // set driver in ThreadLocal
+        return driver;
     }
 
-    public static void quitBrowser() {
-        if (driver.get() != null) {
-            driver.get().quit();
-            driver.remove();
+    public static void quitDriver() {
+        if (driver != null) {
+            driver.quit();
+            driver = null;
         }
     }
 }
