@@ -1,0 +1,9 @@
+<extentreports>
+    <configuration>
+        <theme>dark</theme>
+        <encoding>UTF-8</encoding>
+        <protocol>https</protocol>
+        <documentTitle>Savings Account Automation Report</documentTitle>
+        <reportName>Form Automation Results</reportName>
+    </configuration>
+</extentreports>
