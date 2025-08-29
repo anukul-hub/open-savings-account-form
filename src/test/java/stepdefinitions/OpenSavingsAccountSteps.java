@@ -34,15 +34,15 @@ public class OpenSavingsAccountSteps {
 
 
 
-    @When("I enter {string} in the {string} field")
-    public void i_enter_in_the_field(String value, String fieldId) {
-        accountPage.enterText(fieldId, value);
-    }
-
-    @When("I select {string} from the {string} dropdown")
-    public void i_select_from_the_dropdown(String value, String fieldId) {
-        accountPage.selectDropdown(fieldId, value);
-    }
+//    @When("I enter {string} in the {string} field")
+//    public void i_enter_in_the_field(String value, String fieldId) {
+//        accountPage.enterText(fieldId, value);
+//    }
+//
+//    @When("I select {string} from the {string} dropdown")
+//    public void i_select_from_the_dropdown(String value, String fieldId) {
+//        accountPage.selectDropdown(fieldId, value);
+//    }
 
     @When("I click on the Submit Application button")
     public void i_click_on_the_submit_application_button() {
